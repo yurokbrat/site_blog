@@ -1,0 +1,17 @@
+{% extends "blog/base.html" %}
+{% block content %}
+    <div class="content-section">
+        <form method="POST">
+            {% csrf_token %}
+            <fieldset class="form-group">
+                <legend class="border-bottom mb-4">Удаление записи</legend>
+                <h2>Вы уверены, что хотите удалить эту запись?</h2>
+                <p style="font-size: 25px">"{{ object.title }}"</p>
+            </fieldset>
+            <div class="form-group">
+                <button class="btn btn-outline-danger" type="submit">Да, хочу удалить</button>
+                <a class="btn btn-outline-secondary" href="{% url 'post_detail' object.id %}">Отмена</a>
+            </div>
+        </form>
+    </div>
+{% endblock content %}
