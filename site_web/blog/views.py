@@ -3,6 +3,8 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.contrib.auth.models import User
 from .models import Post
+from users.models import Profile
+from django.db.models import Count
 
 
 def home(request):
@@ -62,6 +64,17 @@ class UserPostListView(ListView):
     def get_queryset(self):
         user = get_object_or_404(User, username=self.kwargs.get('username'))
         return Post.objects.filter(author=user).order_by('-data_posted')
+
+
+class TopUsersView(ListView):
+    model = Profile
+    template_name = 'blog/user_top.html'
+    context_object_name = 'top_users'
+    ordering = ['-post_count']
+
+    def get_queryset(self):
+        return Profile.objects.annotate(post_count=Count('user__post')).order_by('-post_count')[:10]
+
 
 def about(request):
     return render(request, 'blog/about.html', context={'title': 'YuroKeep'})
