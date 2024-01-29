@@ -1,20 +1,65 @@
 {% extends "blog/base.html" %}
+{% load crispy_forms_tags %}
 {% block content %}
   <article class="media content-section">
-    <img class="rounded-circle article-img" src="{{ object.author.profile.image.url }}">
+    <img class="rounded-circle article-img" src="{{ post.author.profile.image.url }}">
     <div class="media-body">
       <div class="article-metadata">
-        <a class="mr-2" href="{% url 'user-posts' post.author.username %}">{{ object.author }}</a>
-        <small class="text-muted">{{ object.date_posted|date:"F d, Y" }}</small>
-        {% if object.author == user %}
+        <a class="mr-2" href="{% url 'user-posts' post.author.username %}">{{ post.author }}</a>
+        <small class="text-muted">{{ post.date_posted|date:"F d, Y" }}</small>
+        {% if post.author == user %}
           <div>
-            <a class="btn btn-secondary btn-sm mt-1 mb-1" href="{% url 'post_update' object.id %}">Редактировать</a>
-            <a class="btn btn-danger btn-sm mt-1 mb-1" href="{% url 'post_delete' object.id %}">Удалить</a>
+            <a class="btn btn-secondary btn-sm mt-1 mb-1" href="{% url 'post_update' post.id %}">Редактировать</a>
+            <a class="btn btn-danger btn-sm mt-1 mb-1" href="{% url 'post_delete' post.id %}">Удалить</a>
           </div>
         {% endif %}
+        <h2 class="article-title">{{ post.title }}</h2>
+        <p class="article-content">{{ post.content }}</p>
       </div>
-      <h2 class="article-title">{{ object.title }}</h2>
-      <p class="article-content">{{ object.content }}</p>
     </div>
   </article>
+
+  <div id="comment_section">
+    <div class="comment-form">
+        <form method="POST">
+            {% csrf_token %}
+            <fieldset class="form-group">
+                <legend class="border-bottom mb-4">Оставить комментарий</legend>
+                {{ form|crispy }}
+            </fieldset>
+            <div class="form-group">
+                <button class="btn btn-outline-info" type="submit">Отправить</button>
+            </div>
+        </form>
+    </div>
+
+    <legend class="border-bottom mb-4">
+        <div> Комментарии пользователей:</div>
+    </legend>
+
+    <div class="comments">
+        {% for comment in comments %}
+      <div class="comment">
+          <a href="{% url 'user-posts' comment.author %}">
+          <img
+            class="image"
+            src="{{ comment.author.profile.image.url }}"
+            alt=""
+          />
+          </a>
+          <div class="content">
+            <div class="meta">
+              <div class="name">
+                          <a href="{% url 'user-posts' comment.author %}">{{ comment.author }}</a>
+              </div>
+              <div class="date">{{ comment.created|date:"F d, Y" }}</div>
+            </div>
+            <div class="text">
+                {{ comment.text }}
+            </div>
+          </div>
+      </div>
+        {%endfor%}
+    </div>
+  </div>
 {% endblock content %}

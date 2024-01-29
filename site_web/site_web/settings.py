@@ -130,8 +130,9 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 MEDIA_URL = '/media/'
 
-ALLOWED_HOSTS = ['6d68-194-5-60-73.ngrok-free.app', '127.0.0.1']
+ALLOWED_HOSTS = ['3028-2a03-d000-1504-e31-c78-420b-5000-9b18.ngrok-free.app', '127.0.0.1']
 
 CSRF_TRUSTED_ORIGINS = [
-    'https://6d68-194-5-60-73.ngrok-free.app',
+    'https://3028-2a03-d000-1504-e31-c78-420b-5000-9b18.ngrok-free.app',
+    'http://127.0.0.1:8000/'
 ]

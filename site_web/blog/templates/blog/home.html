@@ -1,8 +1,10 @@
 {% extends "blog/base.html" %}
 {% block content %}
     {% for post in posts %}
-        <article class="media content-section">
-          <img class="rounded-circle article-img" src="{{ post.author.profile.image.url }}">
+<article class="media content-section" xmlns="http://www.w3.org/1999/html">
+          <a href="{% url 'user-posts' post.author %}">
+            <img class="rounded-circle article-img" src="{{ post.author.profile.image.url }}">
+          </a>
           <div class="media-body">
             <div class="article-metadata">
               <a class="mr-2" href="{% url 'user-posts' post.author.username %}">{{ post.author }}</a>
@@ -15,6 +17,12 @@
             {% else %}
                 {{ post.content }}
             {% endif %}
+            </p>
+              <p class="article-com">
+                <a class="article-link" href="{% url 'post_detail' post.id %}">
+                        <span class="material-symbols-outlined" style="vertical-align: middle;">&#xe0b9;</span>
+                        <span class="article-link">{{ post.comment_set.count }}</span>
+                </a>
             </p>
           </div>
         </article>

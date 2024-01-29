@@ -1,14 +1,35 @@
-from django.shortcuts import render, get_object_or_404
+from django.http import JsonResponse
+from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, View
+from django.utils.decorators import method_decorator
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from .models import Post
+from .models import Post, Comment
 from users.models import Profile
 from django.db.models import Count
+from .forms import CommentForm
+
+
+@login_required
+def like_post(request):
+    if request.method == 'POST' and request.is_ajax():
+        post_id = request.POST.get('post_id')
+        post = get_object_or_404(Post, pk=post_id)
+        print('like postavlen')
+        liked, created = Like.objects.get_or_create(post=post, user=request.user)
+        if not created:
+            liked.delete()
+        like_count = post.like_set.count()
+
+        return JsonResponse({'like_count': like_count})
+
+    return JsonResponse({'error': 'Invalid request'})
 
 
 def home(request):
-    context = {'posts': Post.objects.all()}
+    posts = Post.objects.annotate(comment_count=Count('comment'), like_count=Count('like')).all()
+    context = {'posts': posts}
     return render(request, 'blog/home.html', context)
 
 
@@ -22,6 +43,28 @@ class PostListView(ListView):
 
 class PostDetailView(DetailView):
     model = Post
+
+    def get(self, request, *args, **kwargs):
+        post = get_object_or_404(Post, pk=kwargs['pk'])
+        comments = Comment.objects.filter(post=post).order_by('-created')
+        form = CommentForm()
+        return render(request, 'blog/post_detail.html',
+                      context={'post': post, 'comments': comments, 'form': form})
+
+    @method_decorator(login_required)
+    def post(self, request, *args, **kwargs):
+        post = get_object_or_404(Post, pk=kwargs['pk'])
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            new_comment = form.save(commit=False)
+            new_comment.author = request.user
+            new_comment.post = post
+            new_comment.save()
+            return redirect('post_detail', pk=post.pk)
+        else:
+            comments = Comment.objects.filter(post=post)
+            return render(request, 'blog/post_detail.html',
+                          context={'form': form, 'post': post, 'comments': comments})
 
 
 class PostCreateView(LoginRequiredMixin, CreateView):

@@ -6,7 +6,7 @@
         {% if user.post_count > 0 %}
             <li class="list-group-item d-flex justify-content-between align-items-center">
                 <div>
-                    <a href="{% url 'user-posts' user.user.username %}">{{ user.user.username }}</a>
+                    <a class="mr-2" href="{% url 'user-posts' user.user.username %}">{{ user.user.username }}</a>
                 </div>
                 {% if user.post_count|divisibleby:10 and user.post_count|divisibleby:100 %}
                     <span class="badge badge-primary badge-pill">{{ user.post_count }} постов</span>
