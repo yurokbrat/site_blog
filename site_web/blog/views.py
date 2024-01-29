@@ -11,24 +11,8 @@ from django.db.models import Count
 from .forms import CommentForm
 
 
-@login_required
-def like_post(request):
-    if request.method == 'POST' and request.is_ajax():
-        post_id = request.POST.get('post_id')
-        post = get_object_or_404(Post, pk=post_id)
-        print('like postavlen')
-        liked, created = Like.objects.get_or_create(post=post, user=request.user)
-        if not created:
-            liked.delete()
-        like_count = post.like_set.count()
-
-        return JsonResponse({'like_count': like_count})
-
-    return JsonResponse({'error': 'Invalid request'})
-
-
 def home(request):
-    posts = Post.objects.annotate(comment_count=Count('comment'), like_count=Count('like')).all()
+    posts = Post.objects.annotate(comment_count=Count('comment')).all()
     context = {'posts': posts}
     return render(request, 'blog/home.html', context)
 
