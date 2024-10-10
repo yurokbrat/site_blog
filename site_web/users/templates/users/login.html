@@ -1,4 +1,5 @@
 {% extends 'blog/base.html' %}
+{% load i18n %}
 {% load crispy_forms_tags %}
 {% block content %}
     <div class="content-section">
@@ -17,5 +18,75 @@
                 Нужен аккаунт? <a class="ml-2" href="{% url 'register' %}">Регистрация</a>
             </small>
         </div>
-    </div>
+        <br>
+        <div>
+            <!-- Скрипт VK ID -->
+            <script src="https://unpkg.com/@vkid/sdk@<3.0.0/dist-sdk/umd/index.js"></script>
+            <script type="text/javascript">
+                if ('VKIDSDK' in window) {
+                    const VKID = window.VKIDSDK;
+
+                    VKID.Config.init({
+                        app: 52453584,
+                        redirectUrl: 'http://localhost:8000/profile/',
+                        responseMode: VKID.ConfigResponseMode.Callback,
+                        source: VKID.ConfigSource.LOWCODE,
+                    });
+
+                    const oneTap = new VKID.OneTap();
+
+                    oneTap.render({
+                        container: document.currentScript.parentElement,
+                        showAlternativeLogin: true,
+                        skin: 'secondary',
+                        styles: {
+                            borderRadius: 35,
+                            height: 40
+                        },
+                        oauthList: [
+                            'ok_ru',
+                            'mail_ru'
+                        ]
+                    })
+                        .on(VKID.WidgetEvents.ERROR, vkidOnError)
+                        .on(VKID.OneTapInternalEvents.LOGIN_SUCCESS, function (payload) {
+                            const code = payload.code;
+                            const deviceId = payload.device_id;
+
+                            VKID.Auth.exchangeCode(code, deviceId)
+                                .then(vkidOnSuccess)
+                                .catch(vkidOnError);
+                        });
+                }
+            </script>
+            <br>
+
+        </div>
+        <div class="g-signin2" data-width="800" data-height="50" data-longtitle="false" style="display: flex">
+
+            <script>
+                function onSuccess(googleUser) {
+                    console.log('Logged in as: ' + googleUser.getBasicProfile().getName());
+                }
+
+                function onFailure(error) {
+                    console.log(error);
+                }
+
+                function renderButton() {
+                    gapi.signin2.render('my-signin2', {
+                        'scope': 'profile email',
+                        'width': 240,
+                        'height': 50,
+                        'longtitle': true,
+                        'theme': 'dark',
+                        'onsuccess': onSuccess,
+                        'onfailure': onFailure
+                    });
+                }
+            </script>
+
+            <script src="https://apis.google.com/js/platform.js?onload=renderButton" async defer></script>
+        </div>
+        </div>
 {% endblock content %}
